@@ -158,7 +158,7 @@ class EncoderLayer(nn.Module):
 
     def forward(self, x):
 
-        # x = x.transpose(1,2)
+        x = x.transpose(1,2)
         x = x.permute(0, 2, 1)
         x = self.input_proj(x)
         x = F.gelu(x)
@@ -169,6 +169,7 @@ class EncoderLayer(nn.Module):
             x = block(x)
         x = self.post_ln(x)
 
+        # print("x_enc:", x.shape)
         # print(x.shape)
 
         return x
@@ -185,9 +186,9 @@ class DecoderLayer(nn.Module):
         # self.attn_blocks =
         # self.pos_encoder = PositionalEncoding(config.d_model, config.block_size)
 
-    def forward(self, x):
-        x = self.pos_embedding(x)
-        return x
+    def forward(self, tokens, audio_features):
+        x = self.pos_embedding(tokens)
+        return tokens
 
 
 class QuasTransformer(nn.Module):
@@ -199,28 +200,30 @@ class QuasTransformer(nn.Module):
             config,
         )
 
-        self.text_decoder = DecoderLayer(
+        self.decoder = DecoderLayer(
             config,
         )
 
         self.vocab_proj = nn.Linear(config.embedding_dim, config.vocab_size)
+    def forward(self, mels, tokens):
+        # x = x.transpose(1, 2)
 
-    def forward(self, x):
-        x = x.transpose(1, 2)
-        x = self.audio_encoder(x)
-        x = self.vocab_proj(x)
-
-        return x
+        return self.decoder(tokens, self.audio_encoder(mels))
 
 
 from train.config import model_cfg
+from train.config import train_cfg
 
 BLOCK_SIZE = 4096
 EMBEDDING_DIM = model_cfg.embedding_dim
 N_MELS = 128
 
-# train_sample = torch.randn(8, N_MELS, BLOCK_SIZE)
-# model = QuasTransformer(model_cfg)
-# x = model(train_sample)
-# print(x.shape)
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+mels = torch.randn(8, N_MELS, BLOCK_SIZE).to(device)
+tokens = torch.randint(0, train_cfg.vocab_size, (8, BLOCK_SIZE)).to(device)
+model = QuasTransformer(model_cfg).to(device)
+
+x = model(mels, tokens).to(device)
+print("single_pass:", x.shape)
 # print(model)

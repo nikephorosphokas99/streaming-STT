@@ -23,7 +23,7 @@ class Config:
     vocab_size: int = 1000
     # hidden_size: int = 300
     embedding_dim: int = 512
-    num_layers: int = 8
+    num_layers: int = 2
     batch_size: int = 16
     block_size: int = 2048
     num_heads: int = 8
