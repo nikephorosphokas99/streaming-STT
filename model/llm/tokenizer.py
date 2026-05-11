@@ -70,6 +70,10 @@ class BPETokenizer:
                 "Tokenizer not found. Please train the tokenizer first."
             )
 
+    def load(self):
+        self._ensure_loaded()
+
+
     def encode(self, text: str) -> list[int]:
         self._ensure_loaded()
         return self.tokenizer.encode(text).ids

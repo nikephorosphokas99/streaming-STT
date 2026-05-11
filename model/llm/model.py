@@ -145,18 +145,18 @@ class QuasLLM(nn.Module):
         return x
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-config = Config(dtype=torch.bfloat16)
-vocab_size = config.vocab_size
-block_size = 1024
+# config = Config(dtype=torch.bfloat16)
+# vocab_size = config.vocab_size
+# block_size = 1024
 
-# token indices must be int64 — nn.Embedding handles the dtype cast internally
-dataset = torch.randint(0, vocab_size, (8, block_size)).to(device)
+# # token indices must be int64 — nn.Embedding handles the dtype cast internally
+# dataset = torch.randint(0, vocab_size, (8, block_size)).to(device)
 
-model = QuasLLM(config).to(device)
-result = model(dataset)
+# model = QuasLLM(config).to(device)
+# result = model(dataset)
 
 
-print(result.shape)
-print(result.dtype)
+# print(result.shape)
+# print(result.dtype)

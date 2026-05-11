@@ -211,19 +211,19 @@ class QuasTransformer(nn.Module):
         return self.decoder(tokens, self.audio_encoder(mels))
 
 
-from train.config import model_cfg
-from train.config import train_cfg
+# from train.config import model_cfg
+# from train.config import train_cfg
 
-BLOCK_SIZE = 4096
-EMBEDDING_DIM = model_cfg.embedding_dim
-N_MELS = 128
+# BLOCK_SIZE = 4096
+# EMBEDDING_DIM = model_cfg.embedding_dim
+# N_MELS = 128
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-mels = torch.randn(8, N_MELS, BLOCK_SIZE).to(device)
-tokens = torch.randint(0, train_cfg.vocab_size, (8, BLOCK_SIZE)).to(device)
-model = QuasTransformer(model_cfg).to(device)
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# mels = torch.randn(8, N_MELS, BLOCK_SIZE).to(device)
+# tokens = torch.randint(0, train_cfg.vocab_size, (8, BLOCK_SIZE)).to(device)
+# model = QuasTransformer(model_cfg).to(device)
 
-x = model(mels, tokens).to(device)
-print("single_pass:", x.shape)
-# print(model)
+# x = model(mels, tokens).to(device)
+# print("single_pass:", x.shape)
+# # print(model)
