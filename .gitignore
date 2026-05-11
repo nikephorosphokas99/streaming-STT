@@ -9,3 +9,4 @@ wandb/*
 *.model
 *.vocab
 *.safetensors
+corpus.txt
