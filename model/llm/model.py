@@ -62,10 +62,18 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = config.num_heads
         self.head_dim = config.d_model // config.num_heads
         # Learned Q, K, V projections — essential for the model to learn different subspaces
-        self.w_q = nn.Linear(config.d_model, config.d_model, bias=False, dtype=config.dtype)
-        self.w_k = nn.Linear(config.d_model, config.d_model, bias=False, dtype=config.dtype)
-        self.w_v = nn.Linear(config.d_model, config.d_model, bias=False, dtype=config.dtype)
-        self.out_proj = nn.Linear(config.d_model, config.d_model, bias=False, dtype=config.dtype)
+        self.w_q = nn.Linear(
+            config.d_model, config.d_model, bias=False, dtype=config.dtype
+        )
+        self.w_k = nn.Linear(
+            config.d_model, config.d_model, bias=False, dtype=config.dtype
+        )
+        self.w_v = nn.Linear(
+            config.d_model, config.d_model, bias=False, dtype=config.dtype
+        )
+        self.out_proj = nn.Linear(
+            config.d_model, config.d_model, bias=False, dtype=config.dtype
+        )
         self.dropout_val = config.dropout
 
         # Zero-init out_proj so each attention block starts as an identity residual.
@@ -81,12 +89,12 @@ class MultiHeadAttention(nn.Module):
         K = self.w_k(x).view(B, T, self.num_heads, self.head_dim).transpose(1, 2)
         V = self.w_v(x).view(B, T, self.num_heads, self.head_dim).transpose(1, 2)
 
-        # Flash Attention: O(T) memory instead of O(T²) — avoids the huge attn_score matrix
         y = F.scaled_dot_product_attention(
             Q,
             K,
             V,
             dropout_p=self.dropout_val if self.training else 0.0,
+            is_causal=True,
         )
 
         y = y.transpose(1, 2).contiguous().view(B, T, C)
@@ -128,7 +136,9 @@ class QuasLLM(nn.Module):
         self.d_model = config.d_model
         self.norm_eps = config.norm_eps
 
-        self.token_embedding = nn.Embedding(self.vocab_size, self.d_model, dtype=config.dtype)
+        self.token_embedding = nn.Embedding(
+            self.vocab_size, self.d_model, dtype=config.dtype
+        )
         self.dropout = nn.Dropout()
 
         self.blocks = nn.ModuleList(

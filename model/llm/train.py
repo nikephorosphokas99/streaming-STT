@@ -36,8 +36,8 @@ for epoch in range(config.epochs):
     for i, batch in enumerate(pbar):
         batch = batch.to(device)
         optimizer.zero_grad()
-        y_true
-        y_pred= model(batch)
+        y_true = batch[, 1:]
+        y_pred = model(batch)
         # print("batch:", batch.shape)
-        # break
+        break
     break
