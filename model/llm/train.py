@@ -1,31 +1,43 @@
-from datasets import load_dataset
-from torch.utils.data import DataLoader
-from model import Config, QuasLLM
-from tokenizer import BPETokenizer, TokenizerConfig
 import os
-import torch
 
+import torch
+from dataset_dataloader import QuasLLMDataset, collate_fn
+from datasets import load_dataset
+from tokenizer import BPETokenizer, TokenizerConfig
+from torch.utils.data import DataLoader
+from torch.nn.utils.rnn import pad_sequence
+# from torch.nn.utils import clip_grad_norm_
+
+from model import Config, QuasLLM
 
 config = Config()
 tokenizer_config = TokenizerConfig()
-
-
-dataset = load_dataset("roneneldan/TinyStories")
-train_ds = dataset["train"]
-test_ds = dataset["validation"]
+device = "cuda"
 
 tokenizer = BPETokenizer(tokenizer_config)
-if not os.path.exists(tokenizer_config.module_path_dir):
-    print("training tokenizer...")
-    tokenizer.train()
-else:
-    print("loaded tokenizer...")
-
-
-train_loader = DataLoader(train_ds, batch_size=config.batch_size)
-test_loader = DataLoader(test_ds, batch_size=config.batch_size)
-
-# model & optimizers
-
-model = QuasLLM(config).to(config.device)
+model = QuasLLM(config).to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr)
+
+# dataset & dataloaders
+dataset = load_dataset("roneneldan/TinyStories")
+train_dataset = QuasLLMDataset(dataset["train"], tokenizer)
+val_dataset = QuasLLMDataset(dataset["validation"], tokenizer)
+train_dataloader = DataLoader(
+    train_dataset, batch_size=8, shuffle=True, collate_fn=collate_fn
+)
+val_dataloader = DataLoader(
+    val_dataset, batch_size=8, shuffle=False, collate_fn=collate_fn
+)
+
+# training loop
+import tqdm
+for epoch in range(config.epochs):
+    pbar = tqdm.tqdm(train_dataloader)
+    for i, batch in enumerate(pbar):
+        batch = batch.to(device)
+        optimizer.zero_grad()
+        y_true
+        y_pred= model(batch)
+        # print("batch:", batch.shape)
+        # break
+    break

@@ -21,6 +21,7 @@ class TrainingConfig:
 @dataclass
 class Config:
     vocab_size: int = 1000
+
     # hidden_size: int = 300
     embedding_dim: int = 512
     num_layers: int = 2

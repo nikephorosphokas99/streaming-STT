@@ -4,14 +4,15 @@ from dataclasses import dataclass
 from datasets import load_dataset
 from tokenizers import Tokenizer
 from tokenizers.models import BPE
-from tokenizers.pre_tokenizers import Whitespace
+from tokenizers.pre_tokenizers import ByteLevel
+from tokenizers.decoders import ByteLevel as ByteLevelDecoder
 from tokenizers.trainers import BpeTrainer
 from tqdm import tqdm
 
 
 @dataclass
 class TokenizerConfig:
-    vocab_size: int = 5000
+    vocab_size: int = 10000
     tokenizer_type: str = "BPE"
     module_path_dir: str = "tokenizers/"
 
@@ -20,19 +21,20 @@ class BPETokenizer:
     def __init__(self, config: TokenizerConfig):
         self.config = config
         self.vocab_size = config.vocab_size
+        self._loaded = False
 
         if config.tokenizer_type.lower() == "bpe":
-            special_tokens = ["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]"]
+            special_tokens = ["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]", "[SOS]", "[EOS]"]
             self.trainer = BpeTrainer(
                 vocab_size=config.vocab_size,
                 special_tokens=special_tokens,
             )
             self.tokenizer = Tokenizer(BPE(unk_token="[UNK]"))
-            self.tokenizer.pre_tokenizer = Whitespace()
+            self.tokenizer.pre_tokenizer = ByteLevel(add_prefix_space=False)
+            self.tokenizer.decoder = ByteLevelDecoder()
         else:
             raise ValueError(f"Unsupported tokenizer type: {config.tokenizer_type}")
-
-        self._loaded = False
+        self.load()
 
     def _iter_corpus(self, batch_size: int = 1000):
         """Stream dataset lazily — never loads the full column into RAM."""
@@ -63,12 +65,27 @@ class BPETokenizer:
             return
         save_path = os.path.join(self.config.module_path_dir, "tokenizer.json")
         if os.path.exists(save_path):
+            print("Loading tokenizer from", save_path)
             self.tokenizer = Tokenizer.from_file(save_path)
             self._loaded = True
         else:
-            raise FileNotFoundError(
-                "Tokenizer not found. Please train the tokenizer first."
-            )
+            print("Tokenizer not found. Training...")
+            self.train()
+            # raise FileNotFoundError(
+            #     "Tokenizer not found. Please train the tokenizer first."
+            # )
+
+    @staticmethod
+    def get_special_tokens() -> dict[str, int]:
+        return {
+            "[UNK]": 0,
+            "[CLS]": 1,
+            "[SEP]": 2,
+            "[PAD]": 3,
+            "[MASK]": 4,
+            "[SOS]": 5,
+            "[EOS]": 6,
+        }
 
     def load(self):
         self._ensure_loaded()
@@ -80,16 +97,20 @@ class BPETokenizer:
 
     def decode(self, tokens: list[int]) -> str:
         self._ensure_loaded()
-        return self.tokenizer.decode(tokens)
+        return self.tokenizer.decode(tokens, skip_special_tokens=False)
 
 
-if __name__ == "__main__":
-    config = TokenizerConfig()
-    print("Config:", config)
+# if __name__ == "__main__":
+#     config = TokenizerConfig()
+#     print("Config:", config)
 
-    tokenizer = BPETokenizer(config)
-    # tokenizer.train()
+#     tokenizer = BPETokenizer(config)
+#     # tokenizer.train()
 
-    ids = tokenizer.encode("Hello world, my name is Jean! not jean but Jean")
-    print("Encoded:", ids)
-    print("Decoded:", tokenizer.decode(ids))
+#     ids = tokenizer.encode("[SOS]Hello world, my name is Jean! not jean but Jean[EOS]")
+#     print("Encoded:", ids)
+#     print("Decoded:", tokenizer.decode(ids))
+#     print("-"*50)
+#     ids = tokenizer.encode("[SOS][EOS]")
+#     print("Encoded:", ids)
+#     print("Decoded:", tokenizer.decode(ids))
