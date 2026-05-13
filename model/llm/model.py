@@ -7,8 +7,8 @@ import torch.nn.functional as F
 
 @dataclass
 class Config:
-    dtype: torch.dtype = torch.bfloat16
-    vocab_size: int = 1000
+    dtype: torch.dtype = torch.float32
+    vocab_size: int = 10000
     lr: float = 1e-6
     n_layers: int = 2
     d_model: int = 512
@@ -19,7 +19,7 @@ class Config:
     batch_size: int = 16
 
     gradient_accumulation_steps: int = 8
-    epochs: int = 3
+    epochs: int = 1
     train_steps: int = 5000
 
 
