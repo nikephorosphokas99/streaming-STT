@@ -48,7 +48,7 @@ for epoch in range(config.epochs):
         # print(f"x: {x.shape}, y: {y.shape}")
         optimizer.zero_grad()
         logits = model(x)
-        y_preds = F.softmax(logits, dim=-1).transpose(-2, -1)
+        y_preds = logits.transpose(-2, -1)
         # print("logits:", logits.shape)
         # print("y_preds:", y_preds.shape)
         loss = criterion(y_preds, y)
