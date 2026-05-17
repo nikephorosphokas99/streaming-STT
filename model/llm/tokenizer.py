@@ -95,9 +95,12 @@ class BPETokenizer:
         self._ensure_loaded()
         return self.tokenizer.encode(text).ids
 
-    def decode(self, tokens: list[int]) -> str:
+    def decode(self, tokens: list[int], format_result: bool = True) -> str:
         self._ensure_loaded()
-        return self.tokenizer.decode(tokens, skip_special_tokens=False)
+        result = self.tokenizer.decode(tokens, skip_special_tokens=False)
+        if not format_result:
+            return result
+        return result.replace(" ", "").replace("\n", "")
 
 
 # if __name__ == "__main__":

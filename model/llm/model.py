@@ -8,7 +8,7 @@ import torch.nn.functional as F
 @dataclass
 class Config:
     dtype: torch.dtype = torch.float32
-    vocab_size: int = 10000
+    vocab_size: int = 50240
     lr: float = 1e-6
     n_layers: int = 2
     d_model: int = 512
@@ -16,11 +16,13 @@ class Config:
     num_heads: int = 8
     embedding_dim: int = 512
     dropout: float = 0.01
-    batch_size: int = 16
+    gradient_accumulation_steps: int = 8
+    # batch_size: int = 16
 
     gradient_accumulation_steps: int = 8
     epochs: int = 1
     train_steps: int = 5000
+    block_size: int = 10000
 
 
 class LayerNorm(nn.Module):

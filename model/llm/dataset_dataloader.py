@@ -5,6 +5,11 @@ from tokenizer import BPETokenizer, TokenizerConfig
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, Dataset
 
+from datasets import load_dataset
+
+ds = load_dataset("Alignment-Lab-AI/CodeInterpreterData-sharegpt")
+datasets = ""
+
 
 class QuasLLMDataset(Dataset):
     def __init__(self, splitted_ds, tokenizer_instance: BPETokenizer):
